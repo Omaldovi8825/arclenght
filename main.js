@@ -15,7 +15,6 @@ class Arco {
         this.x1 = undefined
         this.y1 = undefined
         this.puntitos = []
-        this.finalizado = false
         this.iniciarDemo()
     }
 
@@ -37,15 +36,15 @@ class Arco {
         this.crearReticula()
 
         //crear eventos para canvas
-        this.canvas.onmousedown = (ev) => this.marcarInicio(ev)
-        this.canvas.onmousemove = (ev) => this.dibujarArco(ev)
-        this.canvas.onmouseup = () => this.finalizarTrazo()
+        this.canvas.addEventListener( "mousedown", this.marcarInicio )
+        this.canvas.addEventListener( "mousemove", this.dibujarArco )
+        this.canvas.addEventListener( "mouseup", this.finalizarTrazo )
         // this.canvas.ontouchstart = (ev) => this.marcarInicioCel(ev)
         // this.canvas.ontouchmove = (ev) => this.dibujarArcoCel(ev)
         // this.canvas.ontouchend = () => this.finalizarTrazo()
         this.btnRefrescar.onclick = () => location.reload()
-        this.btnSnapshot.onclick = () => this.takeCanvasSnapshot()
-        this.btnDescarga.onclick = () => this.downloadCanvasSnapshot()
+        // this.btnSnapshot.onclick = () => this.takeCanvasSnapshot()
+        // this.btnDescarga.onclick = () => this.downloadCanvasSnapshot()
 
     }
 
@@ -54,6 +53,7 @@ class Arco {
         this.ctx.arc(x, y, 5, 0, 2 * Math.PI)
         this.ctx.fillStyle = "green"
         this.ctx.fill()
+        this.ctx.closePath()
     }
 
     crearReticula(){
@@ -75,6 +75,7 @@ class Arco {
         this.ctx.lineTo( x, this.alturaCanvas )
         this.ctx.strokeStyle = "#e6791e"
         this.ctx.stroke()
+        this.ctx.closePath()
     }
 
     crearLineaHorizontal( y ){
@@ -83,12 +84,11 @@ class Arco {
         this.ctx.lineTo( this.anchoCanvas, y )
         this.ctx.strokeStyle = "#e6791e"
         this.ctx.stroke()
+        this.ctx.closePath()
     }
 
-    marcarInicio( ev ){
+    marcarInicio = ( ev ) => {
 
-        if( this.finalizado ) return 
-    
         const { offsetX: x, offsetY: y } = ev
         this.x1 = x
         this.y1 = y
@@ -105,9 +105,9 @@ class Arco {
     //     this.ctx.beginPath()
     // }
 
-    dibujarArco( ev ){
+    dibujarArco = ( ev ) => {
 
-        if( !this.x1 || !this.y1 || this.finalizado ) return
+        if( !this.x1 || !this.y1 ) return
 
         const { offsetX: x, offsetY: y } = ev
 
@@ -139,13 +139,13 @@ class Arco {
     //     this.y1 = y
     // }
 
-    finalizarTrazo(){
+    finalizarTrazo = () => {
 
-        if( this.finalizado ) return
-
-        this.calcularDerivada()
+        this.ctx.closePath()
         this.spResultado.textContent = this.calcularDerivada() + ' a.u.'
-        this.finalizado= true
+        this.canvas.removeEventListener("mousedown", this.marcarInicio )
+        this.canvas.removeEventListener("mousemove", this.dibujarArco )
+        this.canvas.removeEventListener("mouseup", this.finalizarTrazo )
     }
 
     calcularDerivada(){
